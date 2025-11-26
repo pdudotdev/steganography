@@ -3,7 +3,6 @@
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
 [![Stable Release](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/pdudotdev/SShiD/releases/tag/v0.2.0)
-[![Last Commit](https://img.shields.io/github/last-commit/pdudotdev/SShiD)](https://github.com/pdudotdev/SShiD/commits/main/)
 
 ## 📖 **Table of Contents**
 

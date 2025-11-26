@@ -3,7 +3,6 @@
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
 [![Stable Release](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/pdudotdev/hm-nmap/releases/tag/v0.1.0)
-[![Last Commit](https://img.shields.io/github/last-commit/pdudotdev/hm-nmap)](https://github.com/pdudotdev/hm-nmap/commits/main/)
 
 **HM-Nmap** is a Python-based tool for Linux that enables stealthy communication between two parties by encoding messages into open TCP ports. The **encoder** script converts a plaintext message into a series of open ports, while the **decoder** scans these ports using **nmap** to reconstruct the original message. This technique leverages port scanning capabilities and is particularly useful in scenarios where traditional communication channels are monitored or restricted.
 
