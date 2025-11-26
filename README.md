@@ -4,10 +4,10 @@ This is a repository containing the documentation of each of my ongoing **Networ
 ## 🛠️ **Projects**
 - :telescope: **Steganography:**<br />
   - **hARP** - Network steganography tool for covert communication via spoofed ARP caches and SSH. Active Self-Hosted Network Dead Drops. Full code available [**here**](https://github.com/pdudotdev/hARP).<br />
-  - **hm-nmap** - Covert communication using messages encoded in open ports and decoded via nmap. Passive Self-Hosted Network Dead Drops.<br />
-  - **DHushCP** - Covert communication tool that uses the DHCP protocol to enable secure and hidden message exchange between two machines.<br />
-  - **DHushCP-n** - Based on DHushCP, uses nested Network Steganography by embedding zero-width text stego into network steganography techniques.<br />
-  - **SShiD** - Covert communication tool that uses Wi-Fi beacons to enable secure and hidden message exchange between two machines.<br />
+  - **hm-nmap** - Covert communication using messages encoded in open ports and decoded via nmap. Passive Self-Hosted Network Dead Drops. Docs available [**here**](https://github.com/pdudotdev/steganography/blob/main/2.%20hm-nmap/README.md)<br />
+  - **DHushCP** - Covert communication tool that uses the DHCP protocol to enable secure and hidden message exchange between two machines. Docs available [**here**](https://github.com/pdudotdev/steganography/blob/main/3.%20DHushCP/README.md)<br />
+  - **DHushCP-n** - Based on DHushCP, uses nested Network Steganography by embedding zero-width text stego into network steganography techniques. Docs available [**here**](https://github.com/pdudotdev/steganography/blob/main/4.%20DHushCP-n/README.md)<br />
+  - **SShiD** - Covert communication tool that uses Wi-Fi beacons to enable secure and hidden message exchange between two machines. Docs available [**here**](https://github.com/pdudotdev/steganography/blob/main/5.%20SShiD/README.md)<br />
 
 - :telescope: **Planned 2026:**<br />
   - Packet-hopping covert communication.
