@@ -1,5 +1,5 @@
 ## 🔍 **Overview**
-This is a repository containing the documentation of each of my ongoing **Network Steganography** projects. Note that the code is not included here, since it's going to be part of a comprehensive course I'm creating for a client under a full exclusivity agreement. However, most details about the functionality of each application are provided via the README files inside this repo.
+This is a repository containing the documentation of each of my ongoing **Network Steganography** projects. Note that the code is not included here (except for the **hARP** project), since it's going to be part of a comprehensive course I'm creating for a client under a full exclusivity agreement. However, most details about the functionality of each application are provided via the README files inside this repo.
 
 ## 🛠️ **Projects**
 - :telescope: **Steganography:**<br />
