@@ -15,7 +15,7 @@
   - [⚙️ Installation](#%EF%B8%8F-installation)
   - [🛠️ How It Works](#%EF%B8%8F-how-it-works)
   - [⛑️ Security Considerations](#%EF%B8%8F-security-considerations)
-  - [🎯 Planned Upgrades](#-planned-upgrades)
+  - [🚀 Planned Upgrades](#-planned-upgrades)
   - [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
   - [📜 License](#-license)
   - [🙏 Special Thank You](#-special-thank-you)
@@ -136,7 +136,7 @@ The encoder sends a "ready" signal to the decoder's TCP port 9001, whilst also l
 
 7. 🎯 **`Message Is Ready` Signal**
 
-The decoder listens for the ready signal from the encoder and gets it.
+The decoder listens for the ready signal from the encoder and gets it - port 9001.
 
 ```
 [INFO] Listening for 'ready' signal on port 9001...
@@ -219,8 +219,9 @@ All ports have been closed.
 - **Pre-shared Token**: Be cautious with token sharing. Always share the secret password through a separate secure channel.
 - **Closing Ports**: Closing ports may violate organizational policies. Ensure compliance before using **HM-Nmap**.
 
-## 🎯 Planned Upgrades
+## 🚀 Planned Upgrades
 - [x] Improved CLI experience
+- [ ] Increased message length
 - [ ] More testing is needed
 
 ## ⚠️ Disclaimer
