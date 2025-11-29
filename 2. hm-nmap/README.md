@@ -12,15 +12,8 @@
 
 - [🕵️ HM-Nmap: Stealthy Communication via Port Manipulation](#%EF%B8%8F%EF%B8%8F-hm-nmap-stealthy-communication-via-port-manipulation)
   - [🎯 Advantages](#-advantages)
-  - [🛠️ How It Works](#%EF%B8%8F-how-it-works)
-    - [Encoder](#encoder-host-writing-the-message)
-    - [Decoder](#decoder-host-reading-the-message)
-    - [Cleanup Process](#cleanup-process)
-  - [🎓 Example: Encoding and Decoding](#-example-encoding-and-decoding)
   - [⚙️ Installation](#%EF%B8%8F-installation)
-  - [📝 Usage](#-usage)
-    - [Encoder Setup](#encoder-setup)
-    - [Decoder Setup](#decoder-setup)
+  - [🛠️ How It Works](#%EF%B8%8F-how-it-works)
   - [⛑️ Security Considerations](#%EF%B8%8F-security-considerations)
   - [🎯 Planned Upgrades](#-planned-upgrades)
   - [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
@@ -32,61 +25,60 @@
 - **Easy to Use**: Host 1 (the **Encoder**) encodes a covert message by opening certain ports.
 - **Stealthy**: Host 2 (the **Decoder**) utilizes **nmap** port scanning to decode the hidden message.
 - **No Additional Dependencies**: Relies on standard Python libraries and `nmap`, which is freely available.
-- **Secure**: Needs a pre-shared password (token) and only allows communication with the intended host. 
+- **Secure**: Needs a pre-shared password (token), thus only allowing communication with the intended host. 
 - **Messaging**: Supports messages up to 100 characters. Limit may increase in future versions.
+
+## ⚙️ Installation
+
+### Prerequisites
+
+- Python 3.8 or higher
+- `python-nmap` and `nmap` installed on the decoder machine
+
+### Steps
+
+1. **Prepare the Environment (both hosts)**
+```bash
+mkdir hm-nmap
+cd hm-nmap
+python3 -m venv .hmnmap
+source .hmnmap/bin/activate
+git clone https://github.com/pdudotdev/hm-nmap.git
+```
+
+2. **Install Python-Nmap (Decoder host only)**
+```bash
+pip install python-nmap
+```
+
+3. **Install Nmap (Decoder host only)**
+```bash
+sudo apt install nmap
+```
 
 ## 🛠️ How It Works
 
-### Encoder (Host Writing the Message)
+- **Important**: Make sure the **Decoder** is running and listening *before* executing the **Encoder** script on the other host.
+- **Testing**: **HM-Nmap** has been (and is) currently tested only with **Kali Linux**. Other distros such as **Ubuntu** should be fine, too.
 
-1. **Message Input**: The user inputs a plaintext message (up to 100 characters).
-2. **Port Encoding**:
-   - Each character in the message is converted to its ASCII value.
-   - A unique port number is calculated using the formula:
-     ```
-     port = base_port + (position_in_message * 256) + ASCII_value
-     ```
-   - This ensures that even repeated characters map to different ports based on their position.
-3. **Opening Ports**:
-   - The encoder asynchronously opens the calculated ports on the host machine.
-   - The user can manually check if ports have been opened using `netstat -nlpt`.
-   - A control server listens on a predefined port for shutdown signals from the other host.
-4. **Ready Signal**:
-   - After opening all ports, the encoder sends a "ready" signal to the decoder, indicating that the message is ready to be read.
+Let's walk through an example of how **HM-Nmap** encodes and decodes the secret message `"hello, world!"`.
+- **Encoder IP**: `192.168.56.122`
+- **Decoder IP**: `192.168.56.123`
+- **Shared Token**: `our_password`
 
-### Decoder (Host Reading the Message)
+1. 🎯 **Run the Decoder Script**
 
-1. **Listening for Ready Signal**:
-   - The decoder listens on a specific port for the "ready" signal from the encoder.
-   - Upon receiving the signal and validating the shared secret token, it proceeds to scan ports on the encoder using **nmap**.
-2. **Port Scanning**:
-   - Scans the encoder's IP address over the calculated port range.
-   - Collects all open ports and sorts them.
-3. **Message Decoding**:
-   - Reconstructs the original message by:
-     - Calculating the position and ASCII value from each port number.
-     - Sorting characters based on their position.
-     - Concatenating characters to form the message.
-4. **Shutdown Signal**:
-   - Optionally sends a shutdown signal back to the encoder to trigger cleanup.
+```
+cd ~/hm-nmap
+sudo .hmnmap/bin/python hm-nmap/hm-nmap/decoder.py 192.168.56.122 our_password
+```
 
-### Cleanup Process
+- **`<encoder_ip>`**: IP address of the encoder machine.
+- **`<shared_token>`**: Pre-shared secret token for authentication.
 
-- **Trigger**: Initiated when the decoder sends a shutdown signal after successfully decoding the message.
-- **Function**:
-  - The encoder receives the signal and gracefully closes all opened ports.
-  - Stops the control server and terminates the encoder script.
-- **Purpose**:
-  - Ensures that no unnecessary ports remain open, maintaining system security.
-  - Confirms to the encoder that the message was successfully received and decoded.
+![1-1](docs/1-1.png)
 
-## 🎓 Example: Encoding and Decoding
-
-Let's walk through an example of how **HM-Nmap** encodes and decodes the message `"hello, world!"`.
-
-### 📝 Encoding the Message
-
-1. **Run the Encoder Script**
+2. 🎯 **Run the Encoder Script**
 
    ```
    python3 encoder.py <decoder_ip> <shared_token>
@@ -95,12 +87,12 @@ Let's walk through an example of how **HM-Nmap** encodes and decodes the message
    - **`<decoder_ip>`**: IP address of the decoder machine.
    - **`<shared_token>`**: Pre-shared secret token for authentication.
 
-2. **Input the Message**
+3. 🎯 **Input the Message**
 ```
 [INPUT] Enter the message to encode (max 100 characters): hello, world!
 ```
 
-3. **Port Calculation**
+4. 🎯 **Port Calculation**
 
 Each character in the message is converted to its ASCII value and mapped to a unique port number using the formula:
 ```
@@ -117,64 +109,54 @@ port = base_port + (position_in_message * 256) + ASCII_value
 | 2        | l         | 108         | 10000 + (2 * 256) + 108 = 10620          | 10620       |
 | 3        | l         | 108         | 10000 + (3 * 256) + 108 = 10876          | 10876       |
 | 4        | o         | 111         | 10000 + (4 * 256) + 111 = 11135          | 11135       |
-| 5        | ,         | 44          | 10000 + (5 * 256) + 44 = 11224           | 11224       |
+| 5        | ,         | 44          | 10000 + (5 * 256) + 44 = 11324           | 11324       |
 | 6        |           | 32          | 10000 + (6 * 256) + 32 = 11568           | 11568       |
 | 7        | w         | 119         | 10000 + (7 * 256) + 119 = 11911          | 11911       |
 | 8        | o         | 111         | 10000 + (8 * 256) + 111 = 12159          | 12159       |
-| 9        | r         | 114         | 10000 + (9 * 256) + 114 = 12318          | 12318       |
+| 9        | r         | 114         | 10000 + (9 * 256) + 114 = 12418          | 12418       |
 | 10       | l         | 108         | 10000 + (10 * 256) + 108 = 12668         | 12668       |
 | 11       | d         | 100         | 10000 + (11 * 256) + 100 = 12916         | 12916       |
 | 12       | !         | 33          | 10000 + (12 * 256) + 33 = 13105          | 13105       |
 
-4. **Encoder Output**
+5. 🎯 **Checking Open Ports**
 
-The encoder attempts to open each calculated port and sends a ready signal to the decoder.
+All the necessary ports have been opened on the Encoder machine.
+
+![1-2](docs/1-2.png)
+
+6. 🎯 **Encoder Ready**
+
+The encoder sends a "ready" signal to the decoder's TCP port 9001, whilst also listening on its own port 9000 for a message receipt from the decoder.
 
 ```
 [INFO] Attempting to open ports.
 [INFO] Control server is listening on port 9000
 [INFO] Ready signal sent to the decoder.
-[INFO] Port 10104 is open.
-[INFO] Port 10357 is open.
-[INFO] Port 10620 is open.
-[INFO] Port 10876 is open.
-[INFO] Port 11135 is open.
-[INFO] Port 11224 is open.
-[INFO] Port 11568 is open.
-[INFO] Port 11911 is open.
-[INFO] Port 12159 is open.
-[INFO] Port 12318 is open.
-[INFO] Port 12668 is open.
-[INFO] Port 12916 is open.
-[INFO] Port 13105 is open.
 ```
 
-### 🔍 Decoding the Message
+7. 🎯 **`Message Is Ready` Signal**
 
-1. **Run the Decoder Script**
-
-```
-python3 decoder.py <encoder_ip> <shared_token>
-```
-
-- **`<encoder_ip>`**: IP address of the encoder machine.
-- **`<shared_token>`**: Pre-shared secret token matching the encoder's.
-
-2. **Decoder Output**
-
-The decoder listens for the ready signal, scans the specified port range, and decodes the message.
+The decoder listens for the ready signal from the encoder and gets it.
 
 ```
 [INFO] Listening for 'ready' signal on port 9001...
 [INFO] Received valid 'ready' signal from the encoder.
 [INFO] Scanning <encoder_ip> for open ports in range 10000-65535...
-[INFO] Open ports: [10104, 10357, 10620, 10876, 11135, 11224, 11568, 11911, 12159, 12318, 12668, 12916, 13105]
-[MESSAGE DECODED] Encoder says: hello, world!
-[INPUT] Do you want to confirm receipt to the encoder? y is recommended (y/n): y
-[INFO] Shutdown signal sent to the encoder.
 ```
 
-3. **Decoding the Ports**
+![1-3](docs/1-3.png)
+
+8. 🎯 **Scanning Encoder's Ports via NMAP**
+
+The decoder immediately starts scanning the encoder's open ports in the specified range.
+
+```
+[INFO] Scanning 192.168.56.122 for open ports in range 10000-65295...
+```
+
+![1-4](docs/1-4.png)
+
+9. 🎯 **Decoding the Ports**
 
 Each open port is mapped back to its corresponding character using the formula:
 ```
@@ -188,16 +170,38 @@ character = chr((port - base_port) % 256)
 | 10620       | (10620 - 10000) % 256 = 108     | l         |
 | 10876       | (10876 - 10000) % 256 = 108     | l         |
 | 11135       | (11135 - 10000) % 256 = 111     | o         |
-| 11224       | (11224 - 10000) % 256 = 44      | ,         |
+| 11324       | (11324 - 10000) % 256 = 44      | ,         |
 | 11568       | (11568 - 10000) % 256 = 32      |           |
 | 11911       | (11911 - 10000) % 256 = 119     | w         |
 | 12159       | (12159 - 10000) % 256 = 111     | o         |
-| 12318       | (12318 - 10000) % 256 = 114     | r         |
+| 12418       | (12418 - 10000) % 256 = 114     | r         |
 | 12668       | (12668 - 10000) % 256 = 108     | l         |
 | 12916       | (12916 - 10000) % 256 = 100     | d         |
 | 13105       | (13105 - 10000) % 256 = 33      | !         |
 
-4. **Encoder Side After Shutdown**
+The message is then displayed to the user:
+```
+[MESSAGE DECODED] Encoder says: hello, world!
+```
+
+10. 🎯 **Message Confirmation**
+
+Decoder then asks the user to confirm message receipt to the encoder.
+```
+[INPUT] Do you want to confirm receipt to the encoder? y is recommended (y/n):
+```
+
+11. 🎯 **Shutdown Signal**
+
+After the user enters `y` at the prompt, the TCP shutdown signal is sent to the encoder's port 9000.
+```
+[INPUT] Do you want to confirm receipt to the encoder? y is recommended (y/n): y
+[INFO] Shutdown signal sent to the encoder.
+```
+
+![1-5](docs/1-5.png)
+
+12. 🎯 **Encoder Side After Shutdown**
 
 Upon receiving the shutdown signal, the encoder cleans up by closing all opened ports.
 
@@ -207,93 +211,7 @@ Cleaning up ports by shutting them down.
 All ports have been closed.
 ```
 
-## ⚙️ Installation
-
-### Prerequisites
-
-- Python 3.8 or higher
-- `python-nmap` and `nmap` installed on the decoder machine
-
-### Steps
-
-1. **Prepare the Environment (on both hosts)**
-```bash
-mkdir hm-nmap
-cd hm-nmap
-python3 -m venv .hmnmap
-source .hmnmap/bin/activate
-git clone https://github.com/pdudotdev/hm-nmap.git
-```
-
-2. **Install Python-Nmap (on the Decoder host only)**
-```bash
-pip install python-nmap
-```
-
-3. **Install Nmap (on the Decoder host only)**
-```bash
-sudo apt install nmap
-```
-
-## 📝 Usage
-
-- **Important**: Make sure the **decoder** is running and listening *before* executing the **encoder** script on the other host.
-- **Testing**: **HM-Nmap** has been (and is) currently tested only with **Kali Linux**. Other distros such as **Ubuntu** should be fine, too.
-
-### Encoder Setup
-1. **Run the Encoder Script**
-```bash
-python3 encoder.py <decoder_ip> <shared_token>
-```
-- `<decoder_ip>`: IP address of the decoder machine.
-- `<shared_token>`: Pre-shared secret token for authentication.
-
-2. **Input Message**
-- Enter your message when prompted (max 100 characters).
-```
-[INPUT] Enter the message to encode (max 100 characters):
-```
-
-3. **Encoder Output**
-- The encoder opens the calculated ports and sends a ready signal.
-- Example output:
-```
-[INFO] Attempting to open ports.
-[INFO] Control server is listening on port 9000
-[INFO] Ready signal sent to the decoder.
-```
-
-4. **Optional: Disable Firewall**
-```bash
-sudo ufw disable
-```
-
-### Decoder Setup
-1. **Run the Decoder Script**
-```bash
-python3 decoder.py <encoder_ip> <shared_token>
-```
-- `<encoder_ip>`: IP address of the encoder machine.
-- `<shared_token>`: Pre-shared secret token for authentication.
-
-2. **Decoder Output**
-- The decoder listens for the ready signal, scans ports, and decodes the message.
-- Example output:
-```
-[INFO] Listening for 'ready' signal on port 9001...
-[INFO] Received valid 'ready' signal from the encoder.
-[INFO] Scanning <encoder_ip> for open ports in range 10000-65535...
-[MESSAGE DECODED] Encoder says: Your secret message here
-[INPUT] Do you want to confirm receipt to the encoder? y is recommended (y/n):
-```
-
-3. **Confirm Receipt**
-- Enter `y` to send a shutdown signal, triggering the encoder's cleanup process.
-
-4. **Optional: Disable Firewall**
-```bash
-sudo ufw disable
-```
+![1-6](docs/1-6.png)
 
 ## ⛑️ Security Considerations
 - **Administrative Privileges**: **HM-Nmap** requires **sudo** privileges, so ensure that only trusted users have access to the scripts.
