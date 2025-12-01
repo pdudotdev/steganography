@@ -256,7 +256,7 @@ there’s a hard upper bound on how long the stego text - and therefore the orig
 In practice, this means:
 
 - **Longer plaintext → more zero-width chars → bigger stego text → larger encrypted payload.**
-- At some point, the payload would exceed the 255-byte DHCP option limit, so DHushCP enforces a sane maximum message length (e.g., 20–100 characters depending on the build).
+- At some point, the payload would exceed the 255-byte DHCP option limit, so DHushCP-n enforces a maximum message length.
 
 ### Why Use Text Stego at All?
 
