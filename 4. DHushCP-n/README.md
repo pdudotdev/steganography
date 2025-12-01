@@ -23,7 +23,7 @@
 
 **DHushCP-n** is a Linux-based, secure communication tool built on top of **DHushCP**. This version introduces **nested text steganography**, enhancing **DHushCP**'s capabilities by embedding covert messages within cover texts using zero-width characters.
 
-⚠️ **NOTE:** Read all about **DHushCP**'s features and functionality [**HERE**](https://github.com/pdudotdev/DHushCP?tab=readme-ov-file#%EF%B8%8F-dhushcp-covert-communication-via-dhcp-%EF%B8%8F).
+⚠️ **NOTE:** Read all about **DHushCP**'s features and functionality [**HERE**](https://github.com/pdudotdev/steganography/blob/main/3.%20DHushCP/README.md).
 
 🍀 **NOTE:** This is an ongoing **research project** for educational purposes rather than a full-fledged production-ready tool, so treat it accordingly.
 
@@ -150,9 +150,9 @@ Follow the on-screen prompts on the **Initiator** to initiate and manage the com
    - **Responder:**
      - Upon request (`Ctrl+C`), performs cleanup by deleting encryption keys, clearing system logs (syslog, auth), and resetting the terminal.
 
-## 🕵️‍♂️ Nested Text Steganography in DHushCP
+## 🕵️‍♂️ Nested Text Steganography in DHushCP-n
 
-DHushCP doesn’t just hide data inside DHCP packets - it can also hide the **user’s plaintext** inside a harmless-looking message using invisible Unicode characters. This creates a “stego inside stego” design:
+DHushCP-n doesn’t just hide data inside DHCP packets - it can also hide the **user’s plaintext** inside a harmless-looking message using invisible Unicode characters. This creates a “stego inside stego” design:
 
 1. Your plaintext is hidden inside a short, innocent cover text (using zero-width characters).
 2. That stego text is then encrypted with AES-GCM.
@@ -162,7 +162,7 @@ Even if someone somehow decrypts the packet, what they see is still not the real
 
 ### How the Text Stego Layer Works
 
-When text steganography is enabled, DHushCP uses **zero-width Unicode characters** to encode data:
+With text steganography, DHushCP-n uses **zero-width Unicode characters** to encode data:
 
 - `U+200B` – Zero Width Space
 - `U+200C` – Zero Width Non-Joiner
