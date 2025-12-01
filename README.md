@@ -12,7 +12,9 @@ This is a repository containing the documentation of each of my ongoing **Networ
 - 🎯 **Planned for 2026:**<br />
   - **Packet-hopping** covert communication.
   - **Protocol-hopping** covert communication.
-  - **Blockchain TX-based** covert communication. 
+  - **Blockchain TX-based** covert communication.
+  - Covert **timing channels** and **jitter modulation**.
+  - **Chaffing** and **winnowing** of data transmission.
 
 ## 🎓 **Let's Connect**
 Follow me on [**LinkedIn**](https://www.linkedin.com/in/tmihaicatalin/) to stay up to date with my latest ideas and projects.
