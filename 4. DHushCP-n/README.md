@@ -9,10 +9,10 @@
 - [🛡️ DHushCP-n: DHushCP with Nested Steganography](#%EF%B8%8F-dhushcp-covert-communication-via-dhcp-%EF%B8%8F)
   - [🔍 Overview](#-overview)
   - [🚀 DHushCP-n vs. DHushCP](#-dhushcp-n-vs-dhushcp)
-  - [🔄 Communication Flow](#-communication-flow)
-  - [🔐 Encryption and Hashing Algorithms](#-encryption-and-hashing-algorithms)
   - [🖥️ System Requirements](#%EF%B8%8F-system-requirements)
   - [🛠️ Installation and Setup](#%EF%B8%8F-installation--setup)
+  - [🔄 Communication Flow](#-communication-flow)
+  - [🔐 Encryption and Hashing Algorithms](#-encryption-and-hashing-algorithms)
   - [🎯 Planned Upgrades](#-planned-upgrades)
   - [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
   - [📜 License](#-license)
@@ -23,7 +23,7 @@
 
 **DHushCP-n** is a Linux-based, secure communication tool built on top of **DHushCP**. This version introduces **nested text steganography**, enhancing **DHushCP**'s capabilities by embedding covert messages within cover texts using zero-width characters.
 
-Read all about **DHushCP**'s features [**HERE**](https://github.com/pdudotdev/DHushCP?tab=readme-ov-file#%EF%B8%8F-dhushcp-covert-communication-via-dhcp-%EF%B8%8F).
+⚠️ **NOTE:** Read all about **DHushCP**'s features and functionality [**HERE**](https://github.com/pdudotdev/DHushCP?tab=readme-ov-file#%EF%B8%8F-dhushcp-covert-communication-via-dhcp-%EF%B8%8F).
 
 🍀 **NOTE:** This is an ongoing **research project** for educational purposes rather than a full-fledged production-ready tool, so treat it accordingly.
 
@@ -49,7 +49,52 @@ Unlike the original **DHushCP**, the **DHushCP-n** version comes with some limit
 - **Limited Per-Packet Capacity:** With an 8-character cover text, only 15 characters (secret message) can be embedded per DHCP Discover packet. Transmitting longer messages requires sending multiple packets, which may be noticeable under certain network conditions.
 - **Potential Stripping by Systems:** Some systems, applications, or network devices might inadvertently strip or alter zero-width characters, disrupting message integrity or making embedded messages inaccessible.
 
-## 🔄 Communication Flow
+## 🖥️ System Requirements
+
+- **Operating System:** Linux-based systems (e.g., Ubuntu, Debian, Kali)
+  - Latest release thoroughly tested and functional on **Ubuntu 24.04**.
+- **Python Version:** Python 3.8 or higher
+- **Dependencies:**
+  - `scapy` for packet crafting and sniffing
+  - `cryptography` for ECC encryption and checksum generation
+- **Privileges:** Root or sudo access to send and receive DHCP packets
+- **Network Interface:** Active wireless interface in UP state
+
+## 🛠️ Installation & Setup
+
+1. **Clone the Repository:** Use the commands below in your Linux terminal.
+   ```bash
+   mkdir dhushcpn
+   cd dhushcpn
+   python3 -m venv .dhushcpn
+   source .dhushcpn/bin/activate
+   git clone https://github.com/pdudotdev/DHushCP-n.git
+   ```
+
+2. **Install Dependencies:** Ensure you have Python 3.8 or higher installed. Then, install the required Python packages.
+   ```bash
+   pip install scapy cryptography colorama prompt-toolkit
+   ```
+
+3. **Configure Wireless Interface:** Ensure that your wireless interface is active and in the UP state. **DHushCP** will automatically detect and prompt you to select the active interface if multiple are detected.
+
+4. **Run the Scripts:** Both Initiator and Responder scripts require root privileges to send and sniff DHCP packets. You can run the scripts using `sudo`:
+
+**Responder:**
+```
+   cd ~/dhushcpn
+   sudo .dhushcpn/bin/python DHushCP-n/dhushcp-n/responder.py --id DHUSHCP_ID
+```
+
+**Initiator:**
+```
+   cd ~/dhushcpn
+   sudo .dhushcpn/bin/python DHushCP-n/dhushcp-n/initiator.py --id DHUSHCP_ID
+```
+
+Follow the on-screen prompts on the **Initiator** to initiate and manage the communication session. Make sure the **Responder** is already listening.
+
+## 🔄 Communication Flow (DHushCP-n specific features highlighted)
 
 1. **Initial Exchange:**
    - **Initiator:**
@@ -72,7 +117,8 @@ Unlike the original **DHushCP**, the **DHushCP-n** version comes with some limit
      - Receives the Responder's public key from the DHCP Discover packet.
      - Derives the shared AES key using its private ECC key and the Responder's public ECC key.
      - Prompts the user to input a message to send to the Responder.
-     - **Embeds the secret message into an 8-character cover_text using zero-width characters.**
+     - **Embeds the secret message into an 8-character cover-text (`"Hey bro!"`) using zero-width characters.**
+![ini](docs/ini.png)
      - Encrypts the **stego message** using the shared AES key with AES-GCM and adds a SHA-256 checksum.
      - Embeds the encrypted message with the checksum and session ID into a new DHCP Discover packet.
      - Sends the DHCP Discover packet containing the encrypted message.
@@ -83,7 +129,8 @@ Unlike the original **DHushCP**, the **DHushCP-n** version comes with some limit
      - **Decodes the stego message to retrieve the original secret message.**
      - Displays the decrypted message to the Responder user.
      - Prompts the Responder user to input a reply message.
-     - **Embeds the secret message into an 8-character cover_text using zero-width characters.**
+     - **Embeds the secret reply into an 8-character cover-text (`"Wass'up?"`) using zero-width characters.**
+![res](docs/res.png)
      - Encrypts the reply using the shared AES key with AES-GCM and appends a SHA-256 checksum.
      - Embeds the encrypted reply with the checksum and session ID into a new DHCP Discover packet.
      - Sends the DHCP Discover packet containing the encrypted reply.
@@ -92,203 +139,139 @@ Unlike the original **DHushCP**, the **DHushCP-n** version comes with some limit
    - **Initiator:**
      - Receives the encrypted DHCP Discover packet containing the Responder's reply.
      - Decrypts the reply using the shared AES key.
-     - **Decodes the stego message to retrieve the original secret message.**
-     - Displays the decrypted reply message to the Initiator user.
+     - **Decodes the stego message to retrieve the original secret message and displays the reply message to the Initiator user.**
+     - **The two users can now continue communicating the same way further.**
+     - From the **Initiator**'s side:
+![ini-cont](docs/ini-cont.png)
+     - From the **Responder**'s side:
+![res-cont](docs/res-cont.png)
      - Upon request (`Ctrl+C`), performs cleanup by deleting encryption keys, clearing system logs (syslog, auth), and resetting the terminal.
    
    - **Responder:**
      - Upon request (`Ctrl+C`), performs cleanup by deleting encryption keys, clearing system logs (syslog, auth), and resetting the terminal.
 
-## 🔐 **Encryption and Hashing Algorithms**
+## 🕵️‍♂️ Nested Text Steganography in DHushCP
 
-### Reasons for Choosing the Encryption and Hashing Algorithms
+DHushCP doesn’t just hide data inside DHCP packets - it can also hide the **user’s plaintext** inside a harmless-looking message using invisible Unicode characters. This creates a “stego inside stego” design:
 
-DHushCP utilizes a combination of advanced cryptographic algorithms to ensure secure and covert communication over local networks. The chosen algorithms are selected based on their security strength, efficiency, and suitability for embedding within DHCP packets.
+1. Your plaintext is hidden inside a short, innocent cover text (using zero-width characters).
+2. That stego text is then encrypted with AES-GCM.
+3. The encrypted bytes are embedded in DHCP option 226.
 
-#### 1. Elliptic Curve Cryptography (ECC)
+Even if someone somehow decrypts the packet, what they see is still not the real message, but just a normal-looking string with invisible characters in between.
 
-- **Efficiency**: ECC offers equivalent security to traditional algorithms like RSA but with smaller key sizes. This results in faster computations and reduced overhead, which is essential when embedding data within the limited space of DHCP packets.
-- **Security**: The `SECP384R1` elliptic curve used in DHushCP provides robust security against modern cryptographic attacks.
-- **Key Exchange**: ECC enables secure key exchange through the Elliptic Curve Diffie-Hellman (ECDH) algorithm, allowing both parties to establish a shared secret without transmitting the secret itself over the network.
+### How the Text Stego Layer Works
 
-#### 2. Advanced Encryption Standard (AES) in Galois/Counter Mode (GCM)
+When text steganography is enabled, DHushCP uses **zero-width Unicode characters** to encode data:
 
-- **Confidentiality and Integrity**: AES-GCM provides both encryption (confidentiality) and authentication (integrity) in a single, efficient step. It ensures that the message remains confidential and detects any tampering.
-- **Performance**: AES is widely adopted and optimized in hardware and software, offering excellent performance for encrypting data.
-- **Security**: GCM mode is resistant to various cryptographic attacks and, when used correctly with a unique nonce, provides strong security guarantees.
+- `U+200B` – Zero Width Space
+- `U+200C` – Zero Width Non-Joiner
+- `U+200D` – Zero Width Joiner
+- `U+2060` – Word Joiner
 
-#### 3. HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
+These characters are **invisible** when printed normally, but they are still there as real bytes in the string.
 
-- **Key Derivation**: HKDF is used to derive a strong symmetric encryption key from the shared secret established via ECDH. It ensures the derived key is suitable for encryption purposes.
-- **Standardization**: HKDF is a standardized method for key derivation in cryptographic protocols, providing interoperability and security.
+The idea is simple:
 
-#### 4. Secure Hash Algorithm 256 (SHA-256)
+1. Take the plaintext message (what the user actually wants to send).
+2. Convert it to bits (each character → 8 bits).
+3. Group bits into 2-bit chunks.
+4. Map each 2-bit chunk to one of four zero-width characters.
+5. Interleave those zero-width characters into a visible *cover text* like `"Hey bro!"`.
 
-- **Integrity Verification**: SHA-256 generates a cryptographic hash of the message, which is used to verify that the message has not been altered during transmission.
-- **Collision Resistance**: It is computationally infeasible to find two different messages that produce the same hash, ensuring the uniqueness and integrity of the message.
+The resulting string looks harmless and human-readable, but its “gaps” are full of invisible data.
 
-### How Each Encryption/Hashing Operation Secures Communication
+### Encoding: From Plaintext to Stego Text
 
-#### 1. Key Exchange and Shared Secret Derivation
+Let’s say the user’s real message is:
 
-- **ECC Key Pair Generation**: Both the Initiator and Responder generate their own ECC key pairs (private and public keys) using the `SECP384R1` curve.
+> `hi`
 
-  ```python
-  private_key = ec.generate_private_key(ec.SECP384R1())
-  public_key = private_key.public_key()
-  ```
+1. Convert characters to bytes:
+   - `h` → `01101000`
+   - `i` → `01101001`
 
-- **Public Key Exchange**: The parties exchange their public keys embedded within DHCP Discover packets using custom DHCP options.
+2. Concatenate and split into 2-bit groups:
+   - `01101000 01101001` → `01 10 10 00 01 10 10 01`
 
-- **Shared Secret Derivation**: Each party uses their private key and the other's public key to compute a shared secret via the ECDH algorithm.
+3. Map each 2-bit group to a zero-width character, for example:
+   - `01` → `U+200C` (Zero Width Non-Joiner)
+   - `10` → `U+200D` (Zero Width Joiner)
+   - `00` → `U+200B` (Zero Width Space)
+   - `11` → `U+2060` (Word Joiner)
 
-  ```python
-  shared_secret = private_key.exchange(ec.ECDH(), peer_public_key)
-  ```
+4. Take a cover text such as:
 
-- **AES Key Derivation with HKDF**: The shared secret is passed through HKDF to derive a symmetric AES-256 key for encrypting and decrypting messages.
+   `Hey bro!`
 
-  ```python
-  derived_key = HKDF(
-      algorithm=hashes.SHA256(),
-      length=32,
-      salt=None,
-      info=b'DHushCP-SharedKey',
-  ).derive(shared_secret)
-  ```
+   and insert the zero-width characters between its visible characters:
 
-#### 2. Message Encryption Process
+   - After `H`, insert 1st zero-width character
+   - After `e`, insert 2nd
+   - After `y`, insert 3rd
+   - and so on, appending any leftover zero-width chars at the end.
 
-- **Plaintext Preparation**: The sender prepares the plaintext message to be sent.
+To a human (and most tools), the result still looks like:
 
-- **Checksum Calculation with SHA-256**: A SHA-256 checksum (hash) of the plaintext is computed and appended to the message. This checksum will be used by the recipient to verify the integrity of the message.
+> `Hey bro!`
 
-  ```python
-  digest = hashes.Hash(hashes.SHA256())
-  digest.update(plaintext.encode())
-  checksum = digest.finalize()
-  ```
+But in reality the string is more like:
 
-- **Nonce Generation**: A unique 12-byte nonce is generated for use with AES-GCM encryption. The nonce ensures that each encryption operation is unique, which is critical for the security of GCM mode.
+> `H[ZW]e[ZW]y[ZW] [ZW]b[ZW]r[ZW]o[ZW]![ZW]`
 
-  ```python
-  nonce = os.urandom(12)
-  ```
+where `[ZW]` are invisible zero-width characters carrying the encoded bits of `"hi"`.
 
-- **AES-GCM Encryption**: The plaintext message is encrypted using AES-256 in GCM mode with the derived symmetric key and the generated nonce.
+### Decoding: From Stego Text Back to Plaintext
 
-  ```python
-  aesgcm = AESGCM(aes_key)
-  ciphertext = aesgcm.encrypt(nonce, plaintext.encode(), None)
-  ```
+On the receiving side, the process is reversed:
 
-- **Encrypted Package Creation**: The nonce, ciphertext, and checksum are combined into a single package ready for transmission.
+1. Scan the received text and **extract only the zero-width characters**.
+2. Convert each zero-width character back into its corresponding 2-bit pattern.
+3. Reassemble the 2-bit chunks into full bytes (groups of 8 bits).
+4. Convert each byte back to an ASCII character.
 
-  ```python
-  encrypted_package = nonce + ciphertext + checksum
-  ```
+By doing this, the original plaintext string (e.g. `"hi"`) is recovered in full.
 
-#### 3. Message Transmission
+The visible cover text is effectively just camouflage; the real payload is sitting in those invisible gaps.
 
-- **Embedding in DHCP Packets**: The encrypted package is embedded into DHCP Discover packets using a custom DHCP option (option 226). This allows the message to be transmitted over the network covertly, blending in with regular DHCP traffic.
+### Why This Limits the Maximum Message Length
 
-  ```python
-  options = [(DATA_OPTION, encrypted_package)]
-  packet = create_dhcp_discover(session_id, dhushcp_id, options)
-  send_dhcp_discover(packet, iface)
-  ```
+Each plaintext character:
 
-#### 4. Message Decryption Process
+- is 8 bits,
+- which becomes 4 chunks of 2 bits,
+- which become 4 zero-width characters,
+- which are inserted into (or appended to) the cover text.
 
-- **Packet Reception**: The recipient detects the DHCP Discover packet containing the encrypted message.
+This makes the **stego string longer than the original plaintext**. That stego string is then encrypted with AES-GCM and placed into DHCP option 226, which has a strict maximum size of **255 bytes**.
 
-- **Extraction of Encrypted Package**: The encrypted package is extracted from the DHCP options.
+Because the encrypted data must include:
 
-- **Nonce and Ciphertext Separation**: The nonce and ciphertext are separated from the received package.
+- nonce (12 bytes),
+- ciphertext (which scales with message length),
+- checksum (32 bytes),
 
-  ```python
-  nonce = encrypted_package[:12]
-  ciphertext = encrypted_package[12:-32]
-  received_checksum = encrypted_package[-32:]
-  ```
+there’s a hard upper bound on how long the stego text - and therefore the original plaintext - can be.
 
-- **AES-GCM Decryption**: Using the shared symmetric key and the nonce, the recipient decrypts the ciphertext to retrieve the plaintext message.
+In practice, this means:
 
-  ```python
-  plaintext_bytes = aesgcm.decrypt(nonce, ciphertext, None)
-  plaintext = plaintext_bytes.decode()
-  ```
+- **Longer plaintext → more zero-width chars → bigger stego text → larger encrypted payload.**
+- At some point, the payload would exceed the 255-byte DHCP option limit, so DHushCP enforces a sane maximum message length (e.g., 20–100 characters depending on the build).
 
-- **Checksum Verification**: The recipient computes the SHA-256 checksum of the decrypted plaintext and compares it to the received checksum to verify that the message has not been altered.
+### Why Use Text Stego at All?
 
-  ```python
-  digest = hashes.Hash(hashes.SHA256())
-  digest.update(plaintext.encode())
-  calculated_checksum = digest.finalize()
+Even though AES-GCM already encrypts the message, text steganography adds:
 
-  if calculated_checksum != received_checksum:
-      print("Checksum verification failed!")
-      return None
-  ```
+- **Plausible deniability**  
+  Someone who decrypts the payload still sees only a normal-looking short phrase, not an obvious secret message.
 
-- **Plaintext Retrieval**: If the checksum matches, the recipient accepts the message as authentic and unaltered.
+- **Nested steganography**  
+  The data is hidden first at the **text** level (zero-width characters), then inside the **network** level (DHCP option 226). You’re hiding a secret inside another secret.
 
-#### 5. Security Benefits
+- **Protection from prying eyes**  
+  DHushCP-n hides the real message inside harmless-looking text using invisible characters, in case someone is looking over your shoulder when the message is being decrypted.
 
-- **Confidentiality**: AES-256 encryption ensures that only parties with the correct symmetric key can decrypt the messages, keeping the content confidential.
-
-- **Integrity**: The use of AES-GCM's authentication and an additional SHA-256 checksum ensures that any tampering with the message during transmission is detectable.
-
-- **Authentication**: Since the shared key is derived from the ECDH key exchange using private keys, only the intended parties can compute the shared secret, authenticating each other.
-
-- **Replay Protection**: The use of unique nonces for each message prevents replay attacks, as the same nonce cannot be reused without detection.
-
-- **Stealth**: Embedding encrypted messages within DHCP Discover packets makes the communication less noticeable to network monitoring systems, as it appears as regular network traffic.
-
-By combining these encryption and hashing algorithms, DHushCP provides a secure communication channel that is both confidential and resilient against common network attacks, all while maintaining a low profile within standard network operations.
-
-## 🖥️ System Requirements
-
-- **Operating System:** Linux-based systems (e.g., Ubuntu, Debian, Kali)
-  - Latest release thoroughly tested and functional on **Ubuntu 24.04**.
-- **Python Version:** Python 3.8 or higher
-- **Dependencies:**
-  - `scapy` for packet crafting and sniffing
-  - `cryptography` for ECC encryption and checksum generation
-- **Privileges:** Root or sudo access to send and receive DHCP packets
-- **Network Interface:** Active wireless interface in UP state
-
-## 🛠️ Installation & Setup
-
-1. **Clone the Repository:** Use the commands below in your Linux terminal.
-   ```bash
-   git clone https://github.com/pdudotdev/DHushCP-n.git
-   cd DHushCP
-   ```
-
-2. **Install Dependencies:** Ensure you have Python 3.8 or higher installed. Then, install the required Python packages.
-   ```bash
-   sudo apt install python3-scapy
-   sudo apt install python3-cryptography
-   ```
-
-3. **Configure Wireless Interface:** Ensure that your wireless interface is active and in the UP state. **DHushCP** will automatically detect and prompt you to select the active interface if multiple are detected.
-
-4. **Run the Scripts:** Both Initiator and Responder scripts require root privileges to send and sniff DHCP packets. You can run the scripts using `sudo`:
-
-**Responder:**
-```
-   set +o history
-   sudo python3 responder.py --id DHUSHCP_ID
-```
-
-**Initiator:**
-```
-   set +o history
-   sudo python3 initiator.py --id DHUSHCP_ID
-```
-
-Follow the on-screen prompts on the **Initiator** to initiate and manage the communication session. Make sure the **Responder** is already listening.
+In short: encryption protects **confidentiality**, while text steganography improves **stealth**.
 
 ## 🎯 Planned Upgrades
 - [x] Improved CLI experience
