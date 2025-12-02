@@ -201,6 +201,8 @@ Both Speaker and Listener scripts require root privileges to send or sniff beaco
 
 ## 🔐 **Encryption and Security**
 
+⚠️ **DISCLAIMER**: Full transparency - since I am not an expert in cryptography, I used various public online resources as well as AI to find a proper solution and implementation for this aspect of DHushCP.
+
 ### Choice of Encryption and Hashing Algorithms
 
 SShiD employs robust cryptographic algorithms to ensure the confidentiality and integrity of messages transmitted via Wi-Fi beacon frames. The following algorithms were chosen for their security and performance:
