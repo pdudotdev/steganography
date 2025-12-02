@@ -273,6 +273,8 @@ Even though AES-GCM already encrypts the message, text steganography adds:
 
 In short: encryption protects **confidentiality**, while text steganography improves **stealth**.
 
+⚠️ **DISCLAIMER**: Full transparency - since I am not an expert in cryptography, I used various public online resources as well as AI to find a proper solution and implementation for this aspect of DHushCP.
+
 ## 🎯 Planned Upgrades
 - [x] Improved CLI experience
 - [ ] DER encoding vs. PEM now
