@@ -9,14 +9,13 @@
 - [📡 SShiD: Covert Communication via SSID Beacons](#-sshid---covert-communication-via-ssid-beacons-)
   - [🔍 Overview](#-overview)
   - [🚀 Features](#-features)
-  - [💪 Advantages](#-advantages)
   - [🛠️ Architecture](#%EF%B8%8F-architecture)
-  - [🔄 Communication Flow](#-communication-flow)
-  - [🔐 Encryption and Security](#-encryption-and-security)
   - [🕵 System Requirements](#-system-requirements)
   - [🖥️ Monitor Mode](#%EF%B8%8F-monitor-mode)
   - [⚒️ Installation](#%EF%B8%8F-installation)
   - [⛑️ Usage](#%EF%B8%8F-usage)
+  - [🔄 Communication Flow](#-communication-flow)
+  - [🔐 Encryption and Security](#-encryption-and-security)
   - [🚫 Limitations](#-limitations)
   - [🎯 Planned Upgrades](#-planned-upgrades)
   - [⚠️ Disclaimer](#%EF%B8%8F%EF%B8%8F-disclaimer)
@@ -33,21 +32,14 @@
 - **Covert Communication:** Transmit messages without active network connections.
 - **Encryption:** Utilizes ChaCha20-Poly1305 encryption for secure message transmission.
 - **Custom SSID Generation:** Creates unique SSIDs based on a shared secret password.
+- **Source Device Obfuscation:** The beacons are broadcasted using fake MAC addresses.
 - **Vendor-Specific IEs:** Embeds messages within standard-compliant beacon frames.
 - **Channel Specification:** Operates on a user-defined Wi-Fi channel (default is 1).
 
-## 💪 **Advantages**
+- **NOTE!** Reliability of using beacon frames for the communication flow.
+  - For the sake of blending our covert traffic into the overall traffic, keep in mind that **communication via SShiD will not always be 100% reliable**. Since we're using broadcast messages over Wi-Fi, there's always a chance that packets can be lost due to network congestion, wireless interference, or other factors.
 
-- **Stealthy Transmission:** By leveraging beacon frames, communication remains passive and less detectable.
-- **No Network Association Required:** Devices can exchange information without connecting to an access point.
-- **No Single Point of Failure:** Communication cannot be filtered by a firewall or IDS system.
-- **Standard Compliance:** Uses Wi-Fi standards, enhancing compatibility with various devices.
-- **Encryption Security:** Ensures messages remain confidential and tamper-proof.
-
-- **Reliability of using beacon frames for the communication flow.**
-  - For the sake of blending our covert traffic into the overall traffic, keep in mind that **communication via SShiD will not always be 100% reliable**. Since we're using broadcast messages over Wi-Fi, there's always a chance that packets can be lost due to network congestion, wireless interference, or other factors. Message retries are planned for **future versions**.
-
-## 🛠️ **Architecture**
+## ⚖️ **Architecture**
 
 The project consists of two main components:
 
@@ -56,18 +48,122 @@ The project consists of two main components:
 
 Both components use a shared secret password for SSID generation and message encryption/decryption.
 
+## 🕵 **System Requirements**
+
+- **Operating System:** Linux-based systems (e.g., Ubuntu, Debian, Kali)
+  - Latest release tested and functional on **Ubuntu 24.04**
+- **Python Version:** Python 3.8 or higher
+- **Dependencies:**
+  - `scapy` for packet crafting and sniffing
+  - `cryptography` for encryption and decryption
+- **Privileges:** Root or sudo access to send or sniff WiFi beacons
+- **Network Interface:** Wireless interfaces in **UP** state and **Monitor** mode. **SShiD** will automatically detect and prompt you to select the active interface if multiple are detected.
+
+## 🖥️ **Monitor Mode**
+
+Monitor mode should be enabled on **both the Speaker and Listener** machines prior to using **SShiD**.
+To identify your wireless interface and check if it supports Monitor mode use:
+```bash
+iw dev
+sudo iw list | grep -A 10 "Supported interface modes"
+```
+
+To **enable Monitor mode** (assuming `wlan0` is your interface) use:
+```bash
+sudo apt update
+sudo apt install aircrack-ng
+```
+
+Then enter the following commands:
+```bash
+sudo airmon-ng check kill
+sudo ip link set wlx0 down
+sudo iw dev wlx0 set type monitor
+sudo ip link set wlx0 up
+```
+Or, if you prefer:
+```bash
+sudo airmon-ng check kill
+sudo airmon-ng start wlx0
+```
+
+⚠️ Make sure you replace **wlp3s0** with the name of your own wireless interface.
+
+After enabling Monitor mode, check with `iwconfig` to see if your interface shows **Mode: Monitor**.
+
+![l1](docs/l1.png)
+
+⚠️ Some WiFi cards may show support for Monitor mode but not function properly, for instance when capturing frames. 
+
+To check your **wireless adapter driver** use:
+```bash
+lspci -k | grep -A 3 -i network
+```
+or, for **USB adapters**:
+```bash
+lsusb
+```
+
+Additionally, **check logs** for failure messages if your adapter doesn't capture any traffic at all in Monitor mode.
+```bash
+sudo dmesg | grep -i <driver_name>
+```
+
+🍀 **NOTE:** Do your own research on your adapter and any issues related to Monitor mode. Best case scenario, you need a driver update. Otherwise, you need an adapter that supports Monitor mode. The cheapest option may be **TP-Link TL-WN722N**. Here's a tutorial on how to set it up to allow Monitor mode:
+- [YouTube Tutorial](https://www.youtube.com/watch?v=LzfQAtndtLI)
+
+✅ On the other hand, the most effective adapter for using Monitor mode and properly injecting data into beacons is possibly **Alfa Network AWUS036ACM** - which I use in my lab. I recommend this adapter for the **Speaker** machine, whilst for the **Listener** you can get away with either the integrated adapter or the aforementioned **TP-Link TL-WN722N**.
+
+To **disable Monitor mode** and re-enable the default **Managed mode**:
+```bash
+sudo iw dev wlan0 set type managed
+sudo systemctl start NetworkManager
+```
+
+## ⚒️ **Installation**
+
+1. **Clone the Repository:**
+   ```bash
+   mkdir sshid
+   cd sshid
+   python3 -m venv .sshid
+   source .sshid/bin/activate
+   git clone https://github.com/pdudotdev/SShiD.git
+   ```
+
+2. **Install Dependencies:**
+   ```bash
+   pip install scapy cryptography colorama
+   ```
+
+## ⛑️ **Usage**
+
+Both Speaker and Listener scripts require root privileges to send or sniff beacons. You can run the scripts using `sudo`:
+
+**Listener:**
+   ```
+   sudo .sshid/bin/python SShiD/sshid/listener.py
+   ```
+
+**Speaker:**
+   ```
+   sudo .sshid/bin/python SShiD/sshid/speaker.py
+   ```
+
+⚠️ **NOTE!** Make sure that the **Listener** is running and listening *prior* to starting the **Speaker**.
+
 ## 🔄 **Communication Flow**
 
-Make sure that the **Listener** is running and listening *prior* to executing the **Speaker** script.
-
 1. **Initialization:**
-   - **Speaker and Listener** share a secret password before using **SShiD**.
-   - Both set their wireless interfaces to monitor mode (see commands below).
+   - **Speaker** and **Listener** securely share a secret password before using **SShiD** (e.g. `test1234`).
+   - Both set their wireless interfaces to Monitor mode (see previous instructions).
 
 2. **SSID Generation:**
    - The **Speaker** generates a unique SSID by hashing the password.
-   - This SSID serves as an identifier for the Listener.
-   - The Listener derives the same SSID from the password.
+   - This SSID serves as a beacon identifier for the **Listener**.
+   - The **Listener** derives the same SSID from the pre-shared password.
+
+![l2](docs/l2.png)
 
 3. **Message Encryption:**
    - The **Speaker** encrypts the message using ChaCha20-Poly1305 with a key derived from the password.
@@ -78,6 +174,8 @@ Make sure that the **Listener** is running and listening *prior* to executing th
      - The encrypted message embedded in a Vendor-Specific IE.
      - Standard IEs like RSN information for compliance.
 
+![s1](docs/s1.png)
+
 5. **Broadcasting:**
    - The **Speaker** broadcasts a set of 50 beacon frames.
 
@@ -85,13 +183,19 @@ Make sure that the **Listener** is running and listening *prior* to executing th
    - The **Listener** captures beacon frames in monitor mode.
    - Captures only frames matching the unique SSID.
 
+![l3](docs/l3.png)
+
 7. **Message Extraction:**
    - The **Listener** extracts the encrypted message from the Vendor-Specific IE.
    - Decrypts the message using the shared password.
 
+![l4](docs/l4.png)
+
 8. **Output:**
    - The decrypted message is displayed to the user.
    - Broadcasting and listening are turned off.
+
+![l5](docs/l5.png)
 
 🍀 **NOTE:** **SShiD** enables **one-to-many** communication between the **Speaker** and any **Listener** who knows the password. Therefore, the message exchange is **not** bidirectional.
 
@@ -225,107 +329,13 @@ SShiD employs robust cryptographic algorithms to ensure the confidentiality and 
 
 ### Important Considerations
 
-- **Secure Passwords:** Users should choose strong, unique passwords to prevent brute-force attacks.
+- **Secure Passwords:** Users should choose strong, unique pre-shared passwords before using SShiD.
 
 - **Limited Exposure:** Since beacon frames are broadcasted, it's essential to minimize the transmission duration to reduce the risk of interception.
 
 - **Environment Awareness:** Be mindful of local regulations and potential interference with other wireless networks when using this application.
 
 By carefully integrating these encryption and hashing operations, SShiD ensures secure and confidential communication over Wi-Fi beacon frames, suitable for covert message transmission between parties who share a secret password.
-
-## 🕵 **System Requirements**
-
-- **Operating System:** Linux-based systems (e.g., Ubuntu, Debian, Kali)
-  - Latest release tested and functional on **Ubuntu 24.04**
-- **Python Version:** Python 3.8 or higher
-- **Dependencies:**
-  - `scapy` for packet crafting and sniffing
-  - `cryptography` for encryption and decryption
-- **Privileges:** Root or sudo access to send or sniff WiFi beacons
-- **Network Interface:** Wireless interfaces in **UP** state and **Monitor** mode. **SShiD** will automatically detect and prompt you to select the active interface if multiple are detected.
-
-## 🖥️ **Monitor Mode**
-
-Monitor mode should be enabled on **both** the Speaker and Listener machines prior to using **SShiD**.
-To identify your wireless interface and check if it supports Monitor mode use:
-```bash
-iw dev
-sudo iw list | grep -A 10 "Supported interface modes"
-```
-
-To **enable Monitor mode** (assuming `wlan0` is your interface) use:
-```bash
-sudo apt update
-sudo apt install aircrack-ng
-```
-
-Then enter the following commands:
-```bash
-sudo airmon-ng check kill
-sudo ip link set wlan0 down
-sudo iw dev wlan0 set type monitor
-sudo ip link set wlan0 up
-```
-Or, if you prefer:
-```bash
-sudo airmon-ng check kill
-sudo airmon-ng start wlan0
-```
-
-After enabling Monitor mode, check with `iwconfig` to see if your interface shows **Mode: Monitor**.
-
-Some WiFi cards may show support for Monitor mode but not function properly, for instance when capturing frames. 
-
-To check your **wireless adapter driver** use:
-```bash
-lspci -k | grep -A 3 -i network
-```
-or, for **USB adapters**:
-```bash
-lsusb
-```
-
-Additionally, **check logs** for failure messages if your adapter doesn't capture any traffic at all in Monitor mode.
-```bash
-sudo dmesg | grep -i <driver_name>
-```
-
-🍀 **NOTE:** Do your own research on your adapter and any issues related to Monitor mode. Best case scenario, you need a driver update. Otherwise, you need an adapter that supports Monitor mode. The cheapest option may be **TP-Link TL-WN722N**. Here's a tutorial on how to set it up to allow Monitor mode:
-- [YouTube Tutorial](https://www.youtube.com/watch?v=LzfQAtndtLI)
-
-To **disable Monitor mode** and re-enable the default **Managed mode**:
-```bash
-sudo iw dev wlan0 set type managed
-sudo systemctl start NetworkManager
-```
-
-## ⚒️ **Installation**
-
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/pdudotdev/SShiD.git
-   cd SShiD
-   ```
-
-2. **Install Dependencies:**
-   ```bash
-   sudo apt install python3-scapy
-   sudo apt install python3-cryptography
-   ```
-
-## ⛑️ **Usage**
-
-Both Speaker and Listener scripts require root privileges to send or sniff beacons. You can run the scripts using `sudo`:
-
-**Speaker:**
-   ```
-   sudo python3 speaker.py
-   ```
-
-**Listener:**
-   ```
-   sudo python3 listener.py
-   ```
 
 ## 🚫 Limitations
 - **Hardware Compatibility**: Requires wireless adapters that support monitor mode and packet injection.
