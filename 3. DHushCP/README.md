@@ -185,7 +185,7 @@ Visibly:
 On the wire (also see the screenshot below):
 `D[ZW]H[ZW]C[ZW]P[ZW] i[ZW]s[ZW] ...`
 
-![ts](/docs/ts.png)
+![ts](docs/ts.png)
 
 #### Decoding
 
