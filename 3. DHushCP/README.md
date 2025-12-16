@@ -3,6 +3,7 @@
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)
 [![Stable Release](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/pdudotdev/DHushCP/releases/tag/v0.2.0)
+[![Last Commit](https://img.shields.io/github/last-commit/pdudotdev/DHushCP)](https://github.com/pdudotdev/DHushCP/commits/main/)
 
 ## 📖 Table of Contents
 
@@ -12,6 +13,7 @@
   - [🖥️ System Requirements](#%EF%B8%8F-system-requirements)
   - [🛠️ Installation and Setup](#%EF%B8%8F-installation-and-setup)
   - [🔄 Communication Flow](#-communication-flow)
+  - [🔎 Extra Mile: Using Nested Text Steganography](#-extra-mile-using-nested-text-steganography)
   - [🎯 Planned Upgrades](#-planned-upgrades)
   - [⚠️ Disclaimer](#%EF%B8%8F-disclaimer)
   - [📜 License](#-license)
@@ -123,14 +125,76 @@ Alice needs to send Bob one or more crucial messages without using any messaging
 
 ![ws2](docs/ws2.png)
 
-#### **Why This Setup Is Effective**
-- The entire exchange happens within **standard DHCP Discover packets**, blending into regular network traffic.
-- There is no centralized app or device, **no visible network connection** or direct link between Alice and Bob.
-- After the communication ends, both machines quit **DHushCP** simultaneously and also clear the terminal screen.
-- Useful when Alice and Bob want to avoid suspicion and keep their presence discreet while **transmitting information**.
+## 🔎 **Extra Mile: Using Nested Text Steganography**
 
-#### **Additional Recommendation**
-- Prior to running the Speaker or the Listener, **disable shell history** using `set +o history` (Ubuntu), then re-enable it when the communication is ended using `set -o history`.
+This project also uses **zero-width Unicode characters** to hide a secret message *inside* an otherwise normal-looking text (the **cover text**). Zero-width characters are invisible when displayed, but they still exist in the byte stream and can carry data.
+
+#### Core Idea
+
+- **Plaintext message** is converted to binary
+- **Binary data** is encoded into zero-width characters
+- **Zero-width characters** are injected between visible characters of a cover text
+- On the receiving side, zero-width characters are extracted and decoded back into the original plaintext
+
+#### Bit-to-Character Mapping
+
+Each zero-width character encodes **2 bits**:
+
+- `U+200B` - 00 - Zero Width Space
+- `U+200C` - 01 - Zero Width Non-Joiner
+- `U+200D` - 10 - Zero Width Joiner
+- `U+2060` - 11 - Word Joiner
+
+#### Capacity Rules
+
+- **1 plaintext character** = **8 bits**
+- **1 zero-width character** = **2 bits**
+- So **4 zero-width characters** are required to hide **1 plaintext character**
+
+Now:
+- Each zero-width character occupies **3 bytes** in UTF-8
+- So for **1 plaintext character**:
+  - `4 × 3 bytes = 12 bytes` of hidden data
+
+Because DHCP options are limited to **255 bytes**, this directly limits how much plaintext you can hide.
+
+#### Example: Cover Text
+`DHCP is so cool`
+(15 visible characters)
+
+#### Plaintext Message
+`secret message 1`
+(16 plaintext characters)
+
+#### Message Size on Wire (option 225)
+
+`option225_size = 15 + (16 * 12) = 207 bytes`
+
+#### Encoding Process (Speaker)
+
+1. `"s"` → `01110011`
+2. Split into 2-bit chunks → `01 11 00 11`
+3. Map to zero-width chars → `\u200C \u2060 \u200B \u2060`
+4. Inject invisibly after visible characters
+
+#### What Gets Transmitted
+
+Visibly:
+`DHCP is so cool`
+
+On the wire (also see the screenshot below):
+`D[ZW]H[ZW]C[ZW]P[ZW] i[ZW]s[ZW] ...`
+
+![ts](/docs/ts.png)
+
+#### Decoding
+
+On the **Listener** side:
+
+1. Extract all zero-width characters
+2. Convert them back to 2-bit values
+3. Reassemble bytes (8 bits)
+4. Recover the original plaintext message
 
 ## 🎯 Planned Upgrades
 - [x] Improved CLI experience
