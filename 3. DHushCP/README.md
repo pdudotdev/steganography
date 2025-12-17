@@ -158,6 +158,21 @@ Now:
 
 Because DHCP options are limited to **255 bytes**, this directly limits how much plaintext you can hide.
 
+#### Executing the Code
+Run both **_ts** scripts with the `--text-stego` or `-ts` flag to enable the nested text stego feature.
+
+**Speaker:**
+```
+   cd ~/dhushcp
+   sudo .dhushcp/bin/python DHushCP/dhushcp/speaker_ts.py --id DHUSHCP_ID --text-stego
+```
+
+**Listener:**
+```
+   cd ~/dhushcp
+   sudo .dhushcp/bin/python DHushCP/dhushcp/listener_ts.py --id DHUSHCP_ID --text-stego
+```
+
 #### Example: Cover Text
 `DHCP is so cool`
 (15 visible characters)
