@@ -80,9 +80,10 @@ sudo .hmnmap/bin/python hm-nmap/hm-nmap/decoder.py 192.168.56.122 our_password
 
 2. 🎯 **Run the Encoder Script**
 
-   ```
-   python3 encoder.py <decoder_ip> <shared_token>
-   ```
+```
+cd ~/hm-nmap
+sudo .hmnmap/bin/python hm-nmap/hm-nmap/encoder.py 192.168.56.123 our_password
+```
 
    - **`<decoder_ip>`**: IP address of the decoder machine.
    - **`<shared_token>`**: Pre-shared secret token for authentication.
