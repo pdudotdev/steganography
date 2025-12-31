@@ -8,6 +8,8 @@
 
 🍀 **NOTE:** This is an ongoing **research project** for educational purposes rather than a full-fledged production-ready tool, so treat it accordingly.
 
+⚠️ **NOTE**: The code is currently maintained in a private repository and will be included in upcoming educational materials. Available upon request, in certain conditions such as technical presentation or interviews.
+
 ## 📋 Table of Contents
 
 - [🕵️ hARP: Covert Communication via ARP Cache](#%EF%B8%8F-harp-covert-communication-via-arp-cache-%EF%B8%8F%EF%B8%8F)
