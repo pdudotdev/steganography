@@ -28,7 +28,7 @@ By using plain **DHCP Discover** packets, the communication blends into normal t
 
 🍀 **NOTE:** This is an ongoing **research project** for educational purposes rather than a full-fledged production-ready tool, so treat it accordingly.
 
-⚠️ **NOTE**: The code is currently maintained in a private repository and will be included in upcoming educational materials. Available upon request, in certain conditions such as technical presentation or interviews.
+⚠️ **NOTE:** The code is currently maintained in a private repository and will be included in upcoming educational materials. Available upon request, in certain conditions such as technical presentation or interviews.
 
 ## 🚀 Features
 
